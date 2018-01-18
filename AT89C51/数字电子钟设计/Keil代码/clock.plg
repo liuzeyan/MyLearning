@@ -1,0 +1,16 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\liuzeyan\Desktop\第6组-数字电子钟\代码\clock.uvproj
+Project File Date:  01/15/2018
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling clock.c...
+linking...
+Program Size: data=13.0 xdata=0 code=446
+creating hex file from "clock"...
+"clock" - 0 Error(s), 0 Warning(s).

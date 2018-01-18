@@ -1,0 +1,149 @@
+C51 COMPILER V9.00   CLOCK                                                                 01/15/2018 11:30:24 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE CLOCK
+OBJECT MODULE PLACED IN clock.OBJ
+COMPILER INVOKED BY: C:\Program Files (x86)\Keil\C51\BIN\C51.EXE clock.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #define uchar unsigned char
+   3          #define uint unsigned int
+   4          /*七段共阴极数码管显示定义*/
+   5          uchar code table[ ]={0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,
+   6          0x7F,0x6F,0xBF,0x86,0xDB,0xCF,0XE6,0xED,0xFD,0x87,0xFF,0xEF};
+   7          /*定义并初始化变量*/
+   8          uchar second=0;
+   9          uchar minute=0;
+  10          uchar hour=0;
+  11          uchar count=0;
+  12          sbit P3_0=P3^0;//秒调整端口定义
+  13          sbit P3_1=P3^1;//分钟调整端口定义
+  14          sbit P3_2=P3^2;//小时调整端口定义
+  15          void delay(uchar i );//延时子程序
+  16          void key( );//键盘扫描子程序
+  17          void time( );//时间处理子程序
+  18          void display( );//显示子程序
+  19          
+  20          void delay (uchar i){
+  21   1              uchar j;
+  22   1              for(i;i>0;i--)
+  23   1                      for(j=0;j<125;j++);
+  24   1      }
+  25          
+  26          void key ( ) {
+  27   1              //秒按键的调整
+  28   1              if(P3_0==0){
+  29   2                      delay(30);
+  30   2                      if(P3_0==0){
+  31   3                              second++;
+  32   3                              if(second==60){
+  33   4                                      second=0;
+  34   4                              }
+  35   3                      }
+  36   2                      while(!P3_0);
+  37   2              }
+  38   1              //分钟按键的调整
+  39   1              if(P3_1==0){
+  40   2                      delay(30);
+  41   2                      if(P3_1==0){
+  42   3                              minute++;
+  43   3                              if(minute==60){
+  44   4                                      minute=0;
+  45   4                              }
+  46   3                      }
+  47   2                      while(!P3_1);
+  48   2              }
+  49   1              //小时按键的调整
+  50   1              if(P3_2==0){
+  51   2                      delay(30);
+  52   2                      if(P3_2==0){
+  53   3                              hour++;
+  54   3                              if(hour==24){
+  55   4                                      hour=0;
+C51 COMPILER V9.00   CLOCK                                                                 01/15/2018 11:30:24 PAGE 2   
+
+  56   4                              }
+  57   3                      }
+  58   2              }
+  59   1              while(!P3_2);
+  60   1      }
+  61          
+  62          void time( ){
+  63   1              if(second==60) {
+  64   2                      second=0;
+  65   2                      minute ++;
+  66   2                      if(minute ==60) {
+  67   3                              minute =0;
+  68   3                              hour++;
+  69   3                              if(hour==24) {
+  70   4                                      hour=0;
+  71   4                              }
+  72   3                      }
+  73   2              }
+  74   1      }
+  75          
+  76          void display( ){
+  77   1              P2=0xfe;
+  78   1              P0= table [hour/10];//显示小时的十位
+  79   1              delay(4);
+  80   1              P2=0xfd;
+  81   1              P0=( table [(hour%10)])|0X80;//显示小时的个位
+  82   1              delay(4);
+  83   1              P2=0xfb;
+  84   1              P0= table [minute/10];//显示分的十位
+  85   1              delay(4);
+  86   1              P2=0xf7;
+  87   1              P0=( table [minute%10])|0X80;//显示分的个位
+  88   1              delay(4);
+  89   1              P2=0xef;
+  90   1              P0= table [second/10];//显示秒的十位
+  91   1              delay(4);
+  92   1              P2=0xdf;
+  93   1              P0= table [second%10];//显示秒的个位
+  94   1              delay(4);
+  95   1      }
+  96          /*定时器0方式1，50ms中断一次*/
+  97          void timer0( ) interrupt 1 {
+  98   1              TMOD = 0x01;
+  99   1              TH0=(65536-50000)/256;
+ 100   1              TL0=(65536-50000)%256;
+ 101   1      count++;
+ 102   1              if(count==20){
+ 103   2                      second++;
+ 104   2                      count=0;//对计数单元清零
+ 105   2              }
+ 106   1      }
+ 107          
+ 108          void main( )
+ 109          {
+ 110   1              P3=0xff;//初始化p3口，全设为高电平
+ 111   1              TMOD=0x01;//设置定时器0工作方式1
+ 112   1              TH0=(65536-50000)/256;//预置计数初值
+ 113   1              TL0=(65536-50000)%256;
+ 114   1      EA=1;
+ 115   1              ET0=1;
+ 116   1              TR0=1;
+ 117   1              while (1){
+C51 COMPILER V9.00   CLOCK                                                                 01/15/2018 11:30:24 PAGE 3   
+
+ 118   2                      key( );//按键扫描
+ 119   2                      time( );//时间处理
+ 120   2                      display( );//显示时间
+ 121   2              }
+ 122   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    267    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
